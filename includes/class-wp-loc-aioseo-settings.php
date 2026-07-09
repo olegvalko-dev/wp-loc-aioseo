@@ -176,6 +176,13 @@ class WP_LOC_AIOSEO_Settings {
 
                 <?php submit_button(); ?>
             </form>
+
+            <hr />
+
+            <h2><?php esc_html_e( 'How it works', 'wp-loc-aioseo' ); ?></h2>
+            <p><?php esc_html_e( 'Per-post and per-term SEO fields are translated automatically: WP-LOC duplicates each post or term per language, and AIOSEO keys its tables by ID, so every translation gets its own SEO row without extra configuration. Structural fields (robots directives, schema, OG/Twitter image type) can be seeded from the source at creation time — see the "Seed new translations" toggle above.', 'wp-loc-aioseo' ); ?></p>
+            <p><?php esc_html_e( 'Global strings (site title template, meta description template, breadcrumb formats, etc.) are shared across all posts by AIOSEO. This addon stores a per-language override map and swaps it into memory on each frontend request via aioseo()->options->localized and aioseo()->dynamicOptions->localized. Translations for these strings are edited in the "Global strings" section above.', 'wp-loc-aioseo' ); ?></p>
+            <p><?php esc_html_e( 'The XML sitemap gets hreflang alternate links via AIOSEO\'s public aioseo_sitemap_post and aioseo_sitemap_term filters. When the "Sitemap hreflang alternates" toggle is on and a post or term has published translations, each sitemap entry receives an xhtml:link alternate for every language plus an x-default pointing at the default-language URL.', 'wp-loc-aioseo' ); ?></p>
         </div>
         <?php
     }

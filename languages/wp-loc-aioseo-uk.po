@@ -1,0 +1,71 @@
+# Translation of WP-LOC AIOSEO in Ukrainian
+# Copyright (C) 2024 VALKO.PRO
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: WP-LOC AIOSEO 0.2.0\n"
+"Report-Msgid-Bugs-To: https://valko.pro\n"
+"POT-Creation-Date: 2026-07-09\n"
+"PO-Revision-Date: 2026-07-09\n"
+"Last-Translator: VALKO.PRO\n"
+"Language-Team: Ukrainian\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "WP-LOC AIOSEO requires both WP-LOC and All in One SEO Pack to be active."
+msgstr "WP-LOC AIOSEO потребує активних плагінів WP-LOC та All in One SEO Pack."
+
+msgid "AIOSEO Translations"
+msgstr "Переклади AIOSEO"
+
+msgid "Add at least one non-default language in WP-LOC to translate AIOSEO strings."
+msgstr "Додайте хоча б одну мову (окрім основної) у WP-LOC, щоб перекладати рядки AIOSEO."
+
+msgid "Settings saved."
+msgstr "Налаштування збережено."
+
+msgid "Options"
+msgstr "Параметри"
+
+msgid "Sitemap hreflang alternates"
+msgstr "Альтернати hreflang у sitemap"
+
+msgid "Add per-language alternate links to the XML sitemap"
+msgstr "Додавати мовні alternate-посилання до XML-карти сайту"
+
+msgid "Seed new translations"
+msgstr "Заповнювати нові переклади"
+
+msgid "Copy structural SEO fields from the source when a translation is created"
+msgstr "Копіювати структурні SEO-поля з оригіналу при створенні перекладу"
+
+#. translators: %s: language slug
+msgid "Global strings — %s"
+msgstr "Глобальні рядки — %s"
+
+msgid "Leave a field empty to fall back to the default-language value. Tags like #site_title and #separator_sa are AIOSEO smart tags and should stay as-is."
+msgstr "Залиште поле порожнім, щоб використовувати значення основної мови. Теги на кшталт #site_title та #separator_sa — це смарт-теги AIOSEO, їх міняти не треба."
+
+msgid "General"
+msgstr "Загальне"
+
+msgid "Post types & taxonomies"
+msgstr "Типи записів і таксономії"
+
+msgid "Settings"
+msgstr "Налаштування"
+
+msgid "How it works"
+msgstr "Як це працює"
+
+msgid "Per-post and per-term SEO fields are translated automatically: WP-LOC duplicates each post or term per language, and AIOSEO keys its tables by ID, so every translation gets its own SEO row without extra configuration. Structural fields (robots directives, schema, OG/Twitter image type) can be seeded from the source at creation time — see the \"Seed new translations\" toggle above."
+msgstr "SEO-поля для кожного запису та терміна перекладаються автоматично: WP-LOC дублює кожен запис або термін для кожної мови, а AIOSEO зберігає дані в таблицях за ID — тому кожен переклад отримує власний рядок SEO без жодного додаткового налаштування. Структурні поля (директиви robots, schema, тип зображення OG/Twitter) можна копіювати з оригіналу при створенні — дивіться перемикач «Заповнювати нові переклади» вище."
+
+msgid "Global strings (site title template, meta description template, breadcrumb formats, etc.) are shared across all posts by AIOSEO. This addon stores a per-language override map and swaps it into memory on each frontend request via aioseo()->options->localized and aioseo()->dynamicOptions->localized. Translations for these strings are edited in the \"Global strings\" section above."
+msgstr "Глобальні рядки (шаблон заголовка сайту, шаблон мета-опису, формати хлібних крихт тощо) є спільними для всіх записів в AIOSEO. Цей аддон зберігає мовну карту замін і підставляє її в пам'ять при кожному запиті на фронтенді через aioseo()->options->localized та aioseo()->dynamicOptions->localized. Переклади цих рядків редагуються в розділі «Глобальні рядки» вище."
+
+msgid "The XML sitemap gets hreflang alternate links via AIOSEO's public aioseo_sitemap_post and aioseo_sitemap_term filters. When the \"Sitemap hreflang alternates\" toggle is on and a post or term has published translations, each sitemap entry receives an xhtml:link alternate for every language plus an x-default pointing at the default-language URL."
+msgstr "XML-карта сайту отримує alternate-посилання hreflang через публічні фільтри AIOSEO: aioseo_sitemap_post та aioseo_sitemap_term. Якщо перемикач «Альтернати hreflang у sitemap» увімкнено і запис або термін має опубліковані переклади, кожен запис у sitemap отримує xhtml:link alternate для кожної мови та x-default, що вказує на URL основної мови."
