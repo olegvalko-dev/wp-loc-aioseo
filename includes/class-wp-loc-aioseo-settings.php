@@ -66,8 +66,9 @@ class WP_LOC_AIOSEO_Settings {
 
         // Feature toggles (checkboxes: present => on).
         update_option( WP_LOC_AIOSEO::SETTINGS_OPTION, [
-            'sitemap_alternates' => ! empty( $_POST['sitemap_alternates'] ),
-            'seed_translations'  => ! empty( $_POST['seed_translations'] ),
+            'sitemap_alternates'                   => ! empty( $_POST['sitemap_alternates'] ),
+            'sitemap_skip_translated_system_pages' => ! empty( $_POST['sitemap_skip_translated_system_pages'] ),
+            'seed_translations'                    => ! empty( $_POST['seed_translations'] ),
         ] );
 
         // Per-language string translations.
@@ -125,6 +126,7 @@ class WP_LOC_AIOSEO_Settings {
         $translations     = WP_LOC_AIOSEO_Options::get_translations( $current_lang );
 
         $sitemap_alternates = (bool) WP_LOC_AIOSEO::setting( 'sitemap_alternates', true );
+        $skip_system_pages  = (bool) WP_LOC_AIOSEO::setting( 'sitemap_skip_translated_system_pages', true );
         $seed_translations  = (bool) WP_LOC_AIOSEO::setting( 'seed_translations', true );
 
         ?>
@@ -154,6 +156,10 @@ class WP_LOC_AIOSEO_Settings {
                     <tr>
                         <th scope="row"><?php esc_html_e( 'Sitemap hreflang alternates', 'wp-loc-aioseo' ); ?></th>
                         <td><label><input type="checkbox" name="sitemap_alternates" value="1" <?php checked( $sitemap_alternates ); ?> /> <?php esc_html_e( 'Add per-language alternate links to the XML sitemap', 'wp-loc-aioseo' ); ?></label></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php esc_html_e( 'Translated shop pages', 'wp-loc-aioseo' ); ?></th>
+                        <td><label><input type="checkbox" name="sitemap_skip_translated_system_pages" value="1" <?php checked( $skip_system_pages ); ?> /> <?php esc_html_e( 'Keep translated Cart, Checkout and My account pages out of the XML sitemap', 'wp-loc-aioseo' ); ?></label></td>
                     </tr>
                     <tr>
                         <th scope="row"><?php esc_html_e( 'Seed new translations', 'wp-loc-aioseo' ); ?></th>
