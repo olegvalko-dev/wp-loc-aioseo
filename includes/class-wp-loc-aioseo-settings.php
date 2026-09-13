@@ -3,8 +3,10 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
- * Admin screen for translating AIOSEO's global localizable strings per language,
- * plus the addon's feature toggles. Lives under the wp-loc "Multilingual" menu.
+ * "AIOSEO" tab on the Multilingual → Settings screen: the addon's feature
+ * toggles plus AIOSEO's global localizable strings per language. Rendered and
+ * saved through the wp-loc settings extension hooks (the form, nonce and
+ * redirect belong to wp-loc).
  *
  * The list of translatable keys is read live from AIOSEO
  * (aioseo_options_localized / aioseo_options_dynamic_localized via
@@ -14,9 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 class WP_LOC_AIOSEO_Settings {
 
-    private const PAGE_SLUG  = 'wp-loc-aioseo';
-    private const NONCE      = 'wp_loc_aioseo_save';
-    private const LANG_PARAM = 'wl_lang';
+    const TAB = 'aioseo';
 
     /**
      * Built-in baseline of the core localizable main-option keys with their
@@ -40,30 +40,18 @@ class WP_LOC_AIOSEO_Settings {
     ];
 
     public function __construct() {
-        add_action( 'admin_menu', [ $this, 'add_menu' ], 30 );
-        add_action( 'admin_init', [ $this, 'handle_save' ] );
+        add_filter( 'wp_loc_settings_tabs', [ $this, 'register_tab' ] );
+        add_action( 'wp_loc_settings_render_' . self::TAB, [ $this, 'render_tab' ] );
+        add_action( 'wp_loc_settings_save_' . self::TAB, [ $this, 'handle_save' ] );
     }
 
-    public function add_menu(): void {
-        add_submenu_page(
-            'wp-loc',
-            __( 'AIOSEO Translations', 'wp-loc-aioseo' ),
-            __( 'AIOSEO SEO', 'wp-loc-aioseo' ),
-            'manage_options',
-            self::PAGE_SLUG,
-            [ $this, 'render_page' ]
-        );
+    public function register_tab( array $tabs ): array {
+        $tabs[ self::TAB ] = __( 'AIOSEO', 'wp-loc-aioseo' );
+
+        return $tabs;
     }
 
     public function handle_save(): void {
-        if ( empty( $_POST['wp_loc_aioseo_save'] ) ) {
-            return;
-        }
-
-        if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( self::NONCE ) ) {
-            return;
-        }
-
         // Feature toggles (checkboxes: present => on).
         update_option( WP_LOC_AIOSEO::SETTINGS_OPTION, [
             'sitemap_alternates'                   => ! empty( $_POST['sitemap_alternates'] ),
@@ -71,23 +59,17 @@ class WP_LOC_AIOSEO_Settings {
             'seed_translations'                    => ! empty( $_POST['seed_translations'] ),
         ] );
 
-        // Per-language string translations.
-        $lang = isset( $_POST['wl_lang'] ) ? sanitize_key( wp_unslash( $_POST['wl_lang'] ) ) : '';
-        if ( $lang && in_array( $lang, WP_LOC_AIOSEO_Lang::additional_languages(), true ) ) {
-            $raw     = isset( $_POST['wlaioseo'] ) && is_array( $_POST['wlaioseo'] ) ? wp_unslash( $_POST['wlaioseo'] ) : [];
-            $buckets = [
+        // String translations for the language selected in the admin top bar.
+        $lang = wp_loc_get_admin_lang();
+
+        if ( in_array( $lang, WP_LOC_AIOSEO_Lang::additional_languages(), true ) ) {
+            $raw = isset( $_POST['wlaioseo'] ) && is_array( $_POST['wlaioseo'] ) ? wp_unslash( $_POST['wlaioseo'] ) : [];
+
+            WP_LOC_AIOSEO_Options::save_translations( $lang, [
                 'main'    => $this->sanitize_bucket( $raw['main'] ?? [] ),
                 'dynamic' => $this->sanitize_bucket( $raw['dynamic'] ?? [] ),
-            ];
-
-            WP_LOC_AIOSEO_Options::save_translations( $lang, $buckets );
+            ] );
         }
-
-        wp_safe_redirect( add_query_arg(
-            [ 'page' => self::PAGE_SLUG, self::LANG_PARAM => $lang, 'updated' => '1' ],
-            admin_url( 'admin.php' )
-        ) );
-        exit;
     }
 
     private function sanitize_bucket( $bucket ): array {
@@ -103,92 +85,54 @@ class WP_LOC_AIOSEO_Settings {
         return $clean;
     }
 
-    public function render_page(): void {
-        if ( ! current_user_can( 'manage_options' ) ) {
-            return;
-        }
-
+    public function render_tab(): void {
         $additional = WP_LOC_AIOSEO_Lang::additional_languages();
-
-        if ( empty( $additional ) ) {
-            echo '<div class="wrap"><h1>' . esc_html__( 'AIOSEO Translations', 'wp-loc-aioseo' ) . '</h1>';
-            echo '<p>' . esc_html__( 'Add at least one non-default language in WP-LOC to translate AIOSEO strings.', 'wp-loc-aioseo' ) . '</p></div>';
-            return;
-        }
-
-        $current_lang = isset( $_GET[ self::LANG_PARAM ] ) ? sanitize_key( wp_unslash( $_GET[ self::LANG_PARAM ] ) ) : '';
-        if ( ! in_array( $current_lang, $additional, true ) ) {
-            $current_lang = $additional[0];
-        }
+        $lang       = wp_loc_get_admin_lang();
 
         $main_defaults    = array_merge( self::BASELINE_MAIN, WP_LOC_AIOSEO_Options::base_localized( 'main' ) );
         $dynamic_defaults = WP_LOC_AIOSEO_Options::base_localized( 'dynamic' );
-        $translations     = WP_LOC_AIOSEO_Options::get_translations( $current_lang );
 
         $sitemap_alternates = (bool) WP_LOC_AIOSEO::setting( 'sitemap_alternates', true );
         $skip_system_pages  = (bool) WP_LOC_AIOSEO::setting( 'sitemap_skip_translated_system_pages', true );
         $seed_translations  = (bool) WP_LOC_AIOSEO::setting( 'seed_translations', true );
 
         ?>
-        <div class="wrap">
-            <h1><?php esc_html_e( 'AIOSEO Translations', 'wp-loc-aioseo' ); ?></h1>
+        <div class="wp-loc-settings-section">
+            <h2><?php esc_html_e( 'Options', 'wp-loc-aioseo' ); ?></h2>
+            <table class="form-table" role="presentation">
+                <tr>
+                    <th scope="row"><?php esc_html_e( 'Sitemap hreflang alternates', 'wp-loc-aioseo' ); ?></th>
+                    <td><label><input type="checkbox" name="sitemap_alternates" value="1" <?php checked( $sitemap_alternates ); ?> /> <?php esc_html_e( 'Add per-language alternate links to the XML sitemap', 'wp-loc-aioseo' ); ?></label></td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php esc_html_e( 'Translated shop pages', 'wp-loc-aioseo' ); ?></th>
+                    <td><label><input type="checkbox" name="sitemap_skip_translated_system_pages" value="1" <?php checked( $skip_system_pages ); ?> /> <?php esc_html_e( 'Keep translated Cart, Checkout and My account pages out of the XML sitemap', 'wp-loc-aioseo' ); ?></label></td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php esc_html_e( 'Seed new translations', 'wp-loc-aioseo' ); ?></th>
+                    <td><label><input type="checkbox" name="seed_translations" value="1" <?php checked( $seed_translations ); ?> /> <?php esc_html_e( 'Copy structural SEO fields from the source when a translation is created', 'wp-loc-aioseo' ); ?></label></td>
+                </tr>
+            </table>
 
-            <?php if ( ! empty( $_GET['updated'] ) ) : ?>
-                <div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Settings saved.', 'wp-loc-aioseo' ); ?></p></div>
-            <?php endif; ?>
+            <h2><?php esc_html_e( 'Global strings', 'wp-loc-aioseo' ); ?></h2>
 
-            <h2 class="nav-tab-wrapper">
-                <?php foreach ( $additional as $lang ) :
-                    $url = add_query_arg( [ 'page' => self::PAGE_SLUG, self::LANG_PARAM => $lang ], admin_url( 'admin.php' ) );
-                    $cls = $lang === $current_lang ? 'nav-tab nav-tab-active' : 'nav-tab';
-                    ?>
-                    <a class="<?php echo esc_attr( $cls ); ?>" href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( strtoupper( $lang ) ); ?></a>
-                <?php endforeach; ?>
-            </h2>
-
-            <form method="post" action="<?php echo esc_url( admin_url( 'admin.php?page=' . self::PAGE_SLUG ) ); ?>">
-                <?php wp_nonce_field( self::NONCE ); ?>
-                <input type="hidden" name="wp_loc_aioseo_save" value="1" />
-                <input type="hidden" name="wl_lang" value="<?php echo esc_attr( $current_lang ); ?>" />
-
-                <h2><?php esc_html_e( 'Options', 'wp-loc-aioseo' ); ?></h2>
-                <table class="form-table" role="presentation">
-                    <tr>
-                        <th scope="row"><?php esc_html_e( 'Sitemap hreflang alternates', 'wp-loc-aioseo' ); ?></th>
-                        <td><label><input type="checkbox" name="sitemap_alternates" value="1" <?php checked( $sitemap_alternates ); ?> /> <?php esc_html_e( 'Add per-language alternate links to the XML sitemap', 'wp-loc-aioseo' ); ?></label></td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><?php esc_html_e( 'Translated shop pages', 'wp-loc-aioseo' ); ?></th>
-                        <td><label><input type="checkbox" name="sitemap_skip_translated_system_pages" value="1" <?php checked( $skip_system_pages ); ?> /> <?php esc_html_e( 'Keep translated Cart, Checkout and My account pages out of the XML sitemap', 'wp-loc-aioseo' ); ?></label></td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><?php esc_html_e( 'Seed new translations', 'wp-loc-aioseo' ); ?></th>
-                        <td><label><input type="checkbox" name="seed_translations" value="1" <?php checked( $seed_translations ); ?> /> <?php esc_html_e( 'Copy structural SEO fields from the source when a translation is created', 'wp-loc-aioseo' ); ?></label></td>
-                    </tr>
-                </table>
-
-                <h2><?php
-                    /* translators: %s: language slug */
-                    printf( esc_html__( 'Global strings — %s', 'wp-loc-aioseo' ), '<code>' . esc_html( $current_lang ) . '</code>' );
-                ?></h2>
-                <p class="description"><?php esc_html_e( 'Leave a field empty to fall back to the default-language value. Tags like #site_title and #separator_sa are AIOSEO smart tags and should stay as-is.', 'wp-loc-aioseo' ); ?></p>
-
+            <?php if ( empty( $additional ) ) : ?>
+                <p><?php esc_html_e( 'Add at least one non-default language in WP-LOC to translate AIOSEO strings.', 'wp-loc-aioseo' ); ?></p>
+            <?php elseif ( ! in_array( $lang, $additional, true ) ) : ?>
+                <p><?php esc_html_e( 'Switch to a non-default language in the admin top bar to translate AIOSEO global strings for that language.', 'wp-loc-aioseo' ); ?></p>
+            <?php else :
+                $translations = WP_LOC_AIOSEO_Options::get_translations( $lang );
+                ?>
+                <p class="description"><?php
+                    /* translators: %s: language code */
+                    printf( esc_html__( 'Editing translations for %s. Leave a field empty to fall back to the default-language value. Tags like #site_title and #separator_sa are AIOSEO smart tags and should stay as-is.', 'wp-loc-aioseo' ), '<code>' . esc_html( $lang ) . '</code>' );
+                ?></p>
                 <?php
                 $this->render_bucket( __( 'General', 'wp-loc-aioseo' ), 'main', $main_defaults, $translations['main'] );
                 if ( ! empty( $dynamic_defaults ) ) {
                     $this->render_bucket( __( 'Post types & taxonomies', 'wp-loc-aioseo' ), 'dynamic', $dynamic_defaults, $translations['dynamic'] );
                 }
-                ?>
-
-                <?php submit_button(); ?>
-            </form>
-
-            <hr />
-
-            <h2><?php esc_html_e( 'How it works', 'wp-loc-aioseo' ); ?></h2>
-            <p><?php esc_html_e( 'Per-post and per-term SEO fields are translated automatically: WP-LOC duplicates each post or term per language, and AIOSEO keys its tables by ID, so every translation gets its own SEO row without extra configuration. Structural fields (robots directives, schema, OG/Twitter image type) can be seeded from the source at creation time — see the "Seed new translations" toggle above.', 'wp-loc-aioseo' ); ?></p>
-            <p><?php esc_html_e( 'Global strings (site title template, meta description template, breadcrumb formats, etc.) are shared across all posts by AIOSEO. This addon stores a per-language override map and swaps it into memory on each frontend request via aioseo()->options->localized and aioseo()->dynamicOptions->localized. Translations for these strings are edited in the "Global strings" section above.', 'wp-loc-aioseo' ); ?></p>
-            <p><?php esc_html_e( 'The XML sitemap gets hreflang alternate links via AIOSEO\'s public aioseo_sitemap_post and aioseo_sitemap_term filters. When the "Sitemap hreflang alternates" toggle is on and a post or term has published translations, each sitemap entry receives an xhtml:link alternate for every language plus an x-default pointing at the default-language URL.', 'wp-loc-aioseo' ); ?></p>
+            endif; ?>
         </div>
         <?php
     }

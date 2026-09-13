@@ -14,13 +14,13 @@ WP-LOC duplicates posts/terms per language, and AIOSEO stores per-post/term SEO 
 
 This addon fills the gaps that aren't automatic:
 
-- **Global string translation**: AIOSEO's site-wide strings (homepage / archive / author / date / search title & description templates, separators, paged format, breadcrumb formats, social homepage OG, per-post-type & per-taxonomy templates) live in a single options blob and render the same in every language. The addon serves per-language values for them, edited on **Multilingual → AIOSEO SEO**.
+- **Global string translation**: AIOSEO's site-wide strings (homepage / archive / author / date / search title & description templates, separators, paged format, breadcrumb formats, social homepage OG, per-post-type & per-taxonomy templates) live in a single options blob and render the same in every language. The addon serves per-language values for them, edited on **Multilingual → Settings → AIOSEO**.
 - **Sitemap hreflang**: adds `<xhtml:link rel="alternate" hreflang>` alternates (incl. `x-default`) to AIOSEO's XML sitemap, grouping translated URLs. Toggleable.
 - **New-translation seeding**: when a translation is created, copies structural SEO fields (robots, OG/Twitter object & image type, schema) from the source, leaving text blank for translation; remaps custom social images to the translated attachment. Toggleable.
 
 ## Settings
 
-`Multilingual → AIOSEO SEO` in wp-admin — per-language global SEO strings, plus toggles for sitemap hreflang and new-translation seeding.
+`Multilingual → Settings → AIOSEO` tab in wp-admin — toggles for sitemap hreflang and new-translation seeding, plus AIOSEO global SEO strings for the language selected in the admin top bar (requires the wp-loc settings extension hooks).
 
 ## Architecture
 
