@@ -28,6 +28,9 @@ class WP_LOC_AIOSEO {
     /** @var WP_LOC_AIOSEO_Cache */
     public $cache;
 
+    /** @var WP_LOC_AIOSEO_Redirects */
+    public $redirects;
+
     /** @var WP_LOC_AIOSEO_Settings */
     public $settings;
 
@@ -61,6 +64,7 @@ class WP_LOC_AIOSEO {
             'class-wp-loc-aioseo-sitemap',
             'class-wp-loc-aioseo-seed',
             'class-wp-loc-aioseo-cache',
+            'class-wp-loc-aioseo-redirects',
         ];
 
         foreach ( $includes as $file ) {
@@ -77,6 +81,7 @@ class WP_LOC_AIOSEO {
         $this->sitemap = new WP_LOC_AIOSEO_Sitemap();
         $this->seed    = new WP_LOC_AIOSEO_Seed();
         $this->cache   = new WP_LOC_AIOSEO_Cache();
+        $this->redirects = new WP_LOC_AIOSEO_Redirects();
 
         if ( is_admin() ) {
             $this->settings = new WP_LOC_AIOSEO_Settings();

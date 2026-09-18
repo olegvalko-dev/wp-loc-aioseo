@@ -4,7 +4,7 @@
 Plugin Name: WP-LOC AIOSEO
 Plugin URI: https://wp-loc.com/
 Description: All in One SEO Pack multilingual integration for WP-LOC
-Version: 0.2.0
+Version: 0.2.1
 Requires Plugins: wp-loc, all-in-one-seo-pack-pro
 Author: VALKO.PRO
 Author URI: https://valko.pro
@@ -14,7 +14,7 @@ Text Domain: wp-loc-aioseo
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-define( 'WP_LOC_AIOSEO_VERSION', '0.2.0' );
+define( 'WP_LOC_AIOSEO_VERSION', '0.2.1' );
 define( 'WP_LOC_AIOSEO_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WP_LOC_AIOSEO_URL', plugin_dir_url( __FILE__ ) );
 define( 'WP_LOC_AIOSEO_BASENAME', plugin_basename( __FILE__ ) );
