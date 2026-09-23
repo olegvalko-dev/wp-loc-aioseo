@@ -287,8 +287,7 @@ class WP_LOC_AIOSEO_Sitemap {
     }
 
     /**
-     * Turn a [ lang => url ] map into AIOSEO's $entry['languages'] subentries,
-     * including an x-default pointing at the default language.
+     * Turn a [ lang => url ] map into AIOSEO's $entry['languages'] subentries.
      */
     private function attach( array $entry, array $alternates ): array {
         // One entry is enough. Google treats a cluster without a self-reference
@@ -303,14 +302,6 @@ class WP_LOC_AIOSEO_Sitemap {
             $subentries[] = [
                 'language' => WP_LOC_AIOSEO_Lang::hreflang( $lang ),
                 'location' => $url,
-            ];
-        }
-
-        $default = WP_LOC_AIOSEO_Lang::default_lang();
-        if ( ! empty( $alternates[ $default ] ) ) {
-            $subentries[] = [
-                'language' => 'x-default',
-                'location' => $alternates[ $default ],
             ];
         }
 
